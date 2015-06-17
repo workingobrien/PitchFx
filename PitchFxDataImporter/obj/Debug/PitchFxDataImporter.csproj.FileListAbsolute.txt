@@ -1,0 +1,15 @@
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\PitchFxDataImporter.dll
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\PitchFxDataImporter.pdb
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\COB.LogWrapper.dll
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\Db.Utilities.dll
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\log4net.dll
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\PitchFx.Contract.dll
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\WebDriver.dll
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\COB.LogWrapper.pdb
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\Db.Utilities.pdb
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\PitchFx.Contract.pdb
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\log4net.xml
+C:\dev\PitchFx\PitchFxDataImporter\bin\Debug\WebDriver.xml
+C:\dev\PitchFx\PitchFxDataImporter\obj\Debug\PitchFxDataImporter.csprojResolveAssemblyReference.cache
+C:\dev\PitchFx\PitchFxDataImporter\obj\Debug\PitchFxDataImporter.dll
+C:\dev\PitchFx\PitchFxDataImporter\obj\Debug\PitchFxDataImporter.pdb

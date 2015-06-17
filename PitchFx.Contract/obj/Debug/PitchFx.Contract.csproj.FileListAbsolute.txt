@@ -1,0 +1,9 @@
+C:\dev\PitchFx\PitchFx.Contract\bin\Debug\PitchFx.Contract.dll
+C:\dev\PitchFx\PitchFx.Contract\bin\Debug\PitchFx.Contract.pdb
+C:\dev\PitchFx\PitchFx.Contract\bin\Debug\COB.LogWrapper.dll
+C:\dev\PitchFx\PitchFx.Contract\bin\Debug\log4net.dll
+C:\dev\PitchFx\PitchFx.Contract\bin\Debug\COB.LogWrapper.pdb
+C:\dev\PitchFx\PitchFx.Contract\bin\Debug\log4net.xml
+C:\dev\PitchFx\PitchFx.Contract\obj\Debug\PitchFx.Contract.csprojResolveAssemblyReference.cache
+C:\dev\PitchFx\PitchFx.Contract\obj\Debug\PitchFx.Contract.dll
+C:\dev\PitchFx\PitchFx.Contract\obj\Debug\PitchFx.Contract.pdb

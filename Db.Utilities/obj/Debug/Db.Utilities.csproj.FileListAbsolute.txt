@@ -1,0 +1,12 @@
+C:\dev\PitchFx\Db.Utilities\bin\Debug\Db.Utilities.dll
+C:\dev\PitchFx\Db.Utilities\bin\Debug\Db.Utilities.pdb
+C:\dev\PitchFx\Db.Utilities\bin\Debug\COB.LogWrapper.dll
+C:\dev\PitchFx\Db.Utilities\bin\Debug\log4net.dll
+C:\dev\PitchFx\Db.Utilities\bin\Debug\MySql.Data.dll
+C:\dev\PitchFx\Db.Utilities\bin\Debug\PitchFx.Contract.dll
+C:\dev\PitchFx\Db.Utilities\bin\Debug\COB.LogWrapper.pdb
+C:\dev\PitchFx\Db.Utilities\bin\Debug\PitchFx.Contract.pdb
+C:\dev\PitchFx\Db.Utilities\bin\Debug\log4net.xml
+C:\dev\PitchFx\Db.Utilities\obj\Debug\Db.Utilities.csprojResolveAssemblyReference.cache
+C:\dev\PitchFx\Db.Utilities\obj\Debug\Db.Utilities.dll
+C:\dev\PitchFx\Db.Utilities\obj\Debug\Db.Utilities.pdb

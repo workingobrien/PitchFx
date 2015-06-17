@@ -1,0 +1,1 @@
+C:\dev\PitchFx\PitchFx\bin\Debug\PitchFx.exe.config
