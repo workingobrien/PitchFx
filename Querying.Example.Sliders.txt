@@ -1,0 +1,129 @@
+An exercise in using the PitchFx data.
+
+Question:
+How does horizontal movement of a slider effect batting average? 
+
+Step 1: Find the average horizontal movement and standard deviation of sliders.
+
+select avg(abs(pfx_x)) avgHmove, stddev(abs(pfx_x)), pitch_type from pitches p
+inner join
+(
+select * from atbats ab1
+where ab1.p_throws = 'R'
+)
+as ab
+on p.ab_guid = ab.ab_guid
+group by p.pitch_type
+order by avgHmove desc;
+
+For this specific exercise, I am going to break it out by pitcher handedness. If you wanted to see the results for lefties you would use 'L'.
+
+Step 2: Using the average horizontal movement and standard deviation create 20% buckets along the distrubtion. 
+
+In 2014 the average slider thrown by a lefty had a average horizontal movment of 2.44 inches and the standard deviation was 2.08 inches. That means roughly 2/3 sliders thrown by a lefty moved between .36 inches and 4.52 inches. That is only slightly interesting, what is more interesting would be to see how a batter fared at 20% intervals. 
+
+For lefties the buckets are:
+Bucket%	HzMoveBottom 	HzMoveTop
+0-19	>				0.72
+20-39	0.72			1.92
+40-59	1.92			2.96
+60-79	2.96			4.16
+80-100	4.16			<
+
+For righties the buckets are:
+Bucket%	HzMoveBottom	HzMoveTop
+0-19	>				1.22
+20-39	1.22			2.54
+40-59	2.54			3.69
+60-79	3.69			5
+80-100	5				<
+
+Step 3: Find the total hits on sliders. 
+
+To find out the result of the at bat you need to look all the values in the "event" column on the at bat. I included 'Single','Double','Triple','Home Run'.
+
+The first part of the query looks like:
+
+select count(*) from atbats ab
+inner join 
+(
+select max(p.event_num), p.* from pitches p
+group by p.ab_guid order by p.event_num
+) as InPlayPitches
+on ab.ab_guid = InPlayPitches.ab_guid
+inner join
+(
+select * from games where game_date < '2015-01-01'
+)
+as g
+on ab.game_primarykey = g.game_primarykey
+where ab.event in ('Single','Double','Triple','Home Run')
+and InPlayPitches.pitch_type = 'SL';
+
+The only wrinkle in this query is joining the last pitch of the at bat to the at bat specific at bat row. To achieve this I selected the max event_num value. I think this ensures I am only evaluating the last pitch of the at bat correctly. I did minor testing and it the numbers appeared to match. 
+
+If you wanted to view the total hits for a lefty pitcher against a lefty hitter you would need to add the following: 
+and ab.p_throws = 'L' and ab.stand = 'L'
+
+If you wanted to view the total hits filtered by the corresponding 20% bucket (specifically 40-59 bucket for lefties):
+and abs(InPlayPitches.pfx_x) > 1.9199 and abs(InPlayPitches.pfx_x) < 2.96;
+
+The final query would look like:
+select count(*) from atbats ab
+inner join 
+(
+select max(p.event_num), p.* from pitches p
+group by p.ab_guid order by p.event_num
+) as InPlayPitches
+on ab.ab_guid = InPlayPitches.ab_guid
+inner join
+(
+select * from games where game_date < '2015-01-01'
+)
+as g
+on ab.game_primarykey = g.game_primarykey
+where ab.event in ('Single','Double','Triple','Home Run')
+and InPlayPitches.pitch_type = 'SL'
+and ab.p_throws = 'L' and ab.stand = 'L'
+and abs(InPlayPitches.pfx_x) > 1.9199 and abs(InPlayPitches.pfx_x) < 2.96;
+
+Step 4: Find the total at bats. 
+
+According to fangraphs there were 165,614 at bats in 2014. When I calculate at bats I am short by 1,100. Additionally, I am short roughly 900 plate appearances when compared to fangraphs. The data is "slightly" off, but at least it is consistently off. 
+
+The query I used to find at bats:
+
+select count(*) from atbats ab
+inner join 
+(
+select max(p.event_num), p.* from pitches p
+group by p.ab_guid order by p.event_num
+) as InPlayPitches
+on ab.ab_guid = InPlayPitches.ab_guid
+inner join
+(
+select * from games where game_date < '2015-01-01'
+)
+as g
+on ab.game_primarykey = g.game_primarykey
+where ab.event in ('Batter Interference',	'Bunt Groundout',	'Bunt Lineout',	'Bunt Pop Out',	'Double',	'Double Play',	
+	 					'Fan interference',	'Field Error',	'Fielders Choice',	'Fielders Choice Out',	'Flyout',	'Forceout',
+		 				'Grounded Into DP',	'Groundout', 'Home Run', 'Lineout',	'Pop Out',	'Single',	'Strikeout',
+			 			'Strikeout - DP', 'Triple',	'Triple Play','Catcher Interference')
+and InPlayPitches.pitch_type = 'SL'
+and ab.p_throws = 'L' and ab.stand = 'L'
+and abs(InPlayPitches.pfx_x) > 1.9199 and abs(InPlayPitches.pfx_x) < 2.96;
+
+In conclusion:
+
+Step 3's query returns: 116 hits
+Step 4's query returns: 503 at bats
+
+A left handed batter facing a lefty handed pitcher with a league average slider, defined as horizontal movement between 1.92 inches and 2.96 inches hit .231 in 2014. 
+
+The full results are attached as an excel sheet. The biggest surprise in the results for me was that Lefty Pitcher / Righty  Hitter with almost no horizontal movement was hit 40 points higher then the corresponding Righty Pitcher / Lefty Hitter. 
+
+
+
+
+
