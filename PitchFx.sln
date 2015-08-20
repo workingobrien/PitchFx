@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PitchFx.Contract", "PitchFx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayPitchFx", "DisplayPitchFx\DisplayPitchFx.csproj", "{F869585C-558E-43CD-9931-14D6AE99A18B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PitchFx.Load.ConsoleApp", "PitchFx.Load.ConsoleApp\PitchFx.Load.ConsoleApp.csproj", "{97652D72-E54E-40BE-A90E-382F3E500EA3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PitchFx.Implement.Service", "PitchFx.Implement.Service\PitchFx.Implement.Service.csproj", "{FF5D1A03-993A-4873-A81B-BBA781F81A93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,14 @@ Global
 		{F869585C-558E-43CD-9931-14D6AE99A18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F869585C-558E-43CD-9931-14D6AE99A18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F869585C-558E-43CD-9931-14D6AE99A18B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97652D72-E54E-40BE-A90E-382F3E500EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97652D72-E54E-40BE-A90E-382F3E500EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97652D72-E54E-40BE-A90E-382F3E500EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97652D72-E54E-40BE-A90E-382F3E500EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

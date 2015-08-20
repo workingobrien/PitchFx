@@ -1,0 +1,6 @@
+C:\dev\PitchFx\PitchFx.Loader.Service\bin\Debug\PitchFx.Loader.Service.exe.config
+C:\dev\PitchFx\PitchFx.Loader.Service\bin\Debug\PitchFx.Loader.Service.exe
+C:\dev\PitchFx\PitchFx.Loader.Service\bin\Debug\PitchFx.Loader.Service.pdb
+C:\dev\PitchFx\PitchFx.Loader.Service\obj\Debug\PitchFx.Loader.Service.csprojResolveAssemblyReference.cache
+C:\dev\PitchFx\PitchFx.Loader.Service\obj\Debug\PitchFx.Loader.Service.exe
+C:\dev\PitchFx\PitchFx.Loader.Service\obj\Debug\PitchFx.Loader.Service.pdb

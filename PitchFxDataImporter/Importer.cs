@@ -31,6 +31,12 @@ namespace PitchFxDataImporter
       public ConcurrentDictionary<long, Game> MasterGamesInfo = new ConcurrentDictionary<long, Game>();
       public List<DownloadFile> MasterDopwnloadFileList = new List<DownloadFile>();
 
+      private DownloadFile.InfoToStoreEnum _infoToStore = DownloadFile.InfoToStoreEnum.All;
+      public DownloadFile.InfoToStoreEnum InfoToStore { get { return _infoToStore; }}
+
+      private List<string> _allGids;
+      private List<string> _allYears; 
+
       public static Importer Instance
       {
          get
@@ -46,20 +52,59 @@ namespace PitchFxDataImporter
          }
       }
 
+      public void Init(DownloadFile.InfoToStoreEnum infoToStore)
+      {
+         _infoToStore = infoToStore;
+         Getter.LoadGameCache();
+         Thread.Sleep(5000);
+      }
+
+      public void LoadPitchFxData(DateTime since, DateTime until)
+      {
+         GatherXmlFilenames(since,until);
+         SaveAndReadToDb();
+      }
+
+      public void BulkLoadFromTestConnector()
+      {
+         //GatherAllXmlFilenames();
+         SaveAndReadToDb();
+      }
+
+      private void SaveAndReadToDb()
+      {
+         //SaveXmlFilesToDisk();
+         ReadXmlFilesToDatabase();
+      }
+
       /// <summary>
       /// Reads files beginning here: C:\game\mlb
       /// </summary>
-      public void ReadXmlFilesToDatabase()
+      private void ReadXmlFilesToDatabase()
       {
          try
          {
-            Logger.Log.InfoFormat("#### \\/ #####");
+            _allGids = new List<string>();
+            //foreach  (var downloadFile in MasterDopwnloadFileList)
+            //{
+               //var gid = downloadFile.GameXmlName.Split('/')[downloadFile.GameXmlName.Split('/').Length-2];
+               //if (!_allGids.Contains(gid))
+                  //_allGids.Add(gid);
+            //}
+
+            Logger.Log.InfoFormat("$$$$ \\/ $$$$");
             Logger.Log.InfoFormat("Loading Baseball objects into memory before database save....");
+
             var baseDirInfo = new DirectoryInfo(Constants.BaseSaveDir);
             IEnumerable<DirectoryInfo> dis = baseDirInfo.EnumerateDirectories();
             foreach (var di in dis)
             {
-               LookThroughDirectory(di);
+               //if (!_allYears.Contains(di.Name))
+                  //continue;
+
+               var breakResult = LookThroughDirectory(di);
+               if (breakResult == -1)
+                  break;
             }
             SendToDatabase();
          }
@@ -69,11 +114,18 @@ namespace PitchFxDataImporter
          }
       }
 
-      public void LookThroughDirectory(DirectoryInfo di)
+      public int LookThroughDirectory(DirectoryInfo di)
       {
          var dis = di.EnumerateDirectories();
          foreach (var dInfo in dis)
          {
+            //if (dInfo.Name.StartsWith("gid_2011"))
+            //{
+               //return -1;
+            //}
+
+            
+            //if (dInfo.Name.StartsWith("gid_") && _allGids.Contains(dInfo.Name))
             if (dInfo.Name.StartsWith("gid_"))
             {
                var gameFile = dInfo.GetFiles();
@@ -81,8 +133,26 @@ namespace PitchFxDataImporter
                {
                   try
                   {
-                     var allInnings = dInfo.GetDirectories()[0].GetFiles()[0];
-                     ProcessFileInfos(gameFile[0], allInnings);
+                     FileInfo allInnings = null;
+                     FileInfo[] allPitchers = null;
+                     FileInfo[] allBatters = null;
+
+                     foreach (var dir in dInfo.GetDirectories())
+                     {
+                        switch (dir.Name)
+                        {
+                           case Constants.BattersDirectoryName:
+                              allBatters = dir.GetFiles();
+                              break;
+                           case Constants.PitchersDirectoryName:
+                              allPitchers = dir.GetFiles();
+                              break;
+                           case Constants.InningDirectoryName:
+                              allInnings = dir.GetFiles()[0];
+                              break;
+                        }
+                     }
+                     ProcessFileInfos(gameFile[0], allInnings,allPitchers,allBatters);
                   }
                   catch (Exception ex)
                   {
@@ -91,17 +161,17 @@ namespace PitchFxDataImporter
                }
                else
                   Logger.Log.WarnFormat("{0} does not have game.xml file", dInfo.Name);
-
             }
             else
             {
                LookThroughDirectory(dInfo);
             }
          }
+         return 0;
       }
 
       public ConcurrentDictionary<long, Game> LinkDeserializeAtBats(ConcurrentDictionary<long, Game> games, List<AtBat> atBats,
-                                                            ref long minGamePrimaryKey, ref long maxGamePrimaryKey)//, List<Pitch> pitches)
+                                                            ref long minGamePrimaryKey, ref long maxGamePrimaryKey)
       {
          try
          {
@@ -209,8 +279,8 @@ namespace PitchFxDataImporter
             //   MasterGamesInfo.TryRemove(game.GamePrimaryKey, out gameToRemove);
             //}
 
-            Writer.UpdateTableWithGameInfo(MasterGamesInfo);
-            RemoveWrittenRecordsFromMemory();
+            Writer.UpdateTableWithGameInfo(MasterGamesInfo, _infoToStore);
+            //RemoveWrittenRecordsFromMemory();
 
 
          }

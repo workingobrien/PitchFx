@@ -7,6 +7,7 @@ using COB.LogWrapper;
 using Db.Utilities;
 using log4net;
 using log4net.Config;
+using PitchFx.Contract;
 using PitchFxDataImporter;
 
 [assembly: XmlConfigurator(Watch = true)]
@@ -30,12 +31,11 @@ namespace TestConnector
          try
          {
             Logger.Log.InfoFormat("Starting up PitchFx test connection...");
+            Importer.Instance.Init(DownloadFile.InfoToStoreEnum.Inning);
+            Importer.Instance.BulkLoadFromTestConnector();
 
-            Importer.Instance.GatherAllXmlFilenames();
-            
-            Importer.Instance.SaveXmlFilesToDisk();
+            //Importer.Instance.SaveNumberOfAtBatsAndPitchesOnGame();
 
-            Importer.Instance.ReadXmlFilesToDatabase();
             Logger.Log.InfoFormat("Finished!.....");
 
          }

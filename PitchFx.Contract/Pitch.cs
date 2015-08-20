@@ -28,7 +28,7 @@ namespace PitchFx.Contract
       private const string SzTopCol = "sz_top";
       private const string SzBotCol = "sz_bot";
       private const string PfxXCol = "pfx_x";
-      private const string PfxYCol = "pfx_y";
+      private const string PfxZCol = "pfx_z";
       private const string PxCol = "px";
       private const string PzCol = "pz";
       private const string X0Col = "x0";
@@ -79,7 +79,7 @@ namespace PitchFx.Contract
             SzTop = GetDoubleValue(row[SzTopCol].ToString());
             SzBot = GetDoubleValue(row[SzBotCol].ToString());
             PfxX = GetDoubleValue(row[PfxXCol].ToString());
-            PfxY = GetDoubleValue(row[PfxYCol].ToString());
+            PfxZ = GetDoubleValue(row[PfxZCol].ToString());
             Px = GetDoubleValue(row[PxCol].ToString());
             Pz = GetDoubleValue(row[PzCol].ToString());
             X0 = GetDoubleValue(row[X0Col].ToString());
@@ -212,8 +212,8 @@ namespace PitchFx.Contract
       [XmlAttribute("pfx_x")]
       public double PfxX { get; set; }
 
-      [XmlAttribute("pfx_y")]
-      public double PfxY { get; set; }
+      [XmlAttribute("pfx_z")]
+      public double PfxZ { get; set; }
 
       [XmlAttribute("px")]
       public double Px { get; set; }

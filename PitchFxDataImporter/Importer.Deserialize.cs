@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using COB.LogWrapper;
-using Db.Utilities;
+using log4net;
 using PitchFx.Contract;
 using Action = PitchFx.Contract.Action;
 
@@ -15,7 +13,8 @@ namespace PitchFxDataImporter
 {
    public partial class Importer
    {
-      public void ProcessFileInfos(FileInfo gameFileInfo, FileInfo allInningsFileInfo)
+      public void ProcessFileInfos(FileInfo gameFileInfo, FileInfo allInnings,
+                                   FileInfo[] allPitchers, FileInfo[] allBatters)
       {
          try
          {
@@ -23,13 +22,37 @@ namespace PitchFxDataImporter
             if (game == null)
                throw new Exception("Could not deserialize game for file: " + gameFileInfo.FullName);
 
+            //if (game.GamePrimaryKey == 0)
+               //throw new Exception("Could not deserialize game because it has no primary key: " + gameFileInfo.FullName);
+
             if (game.GamePrimaryKey == 0)
-               throw new Exception("Could not deserialize game because it has no primary key: " + gameFileInfo.FullName);
+               return;
+
 
             if (game.Type == Constants.RealGameType)
             {
                MasterGamesInfo.TryAdd(game.GamePrimaryKey, game);
-               DeserializeInningsFile(allInningsFileInfo, game);
+
+               var pitchers = new List<Player>();
+               var batters = new List<Player>();
+
+               switch (_infoToStore)
+               {
+                  case DownloadFile.InfoToStoreEnum.All:
+                     DeserializeInningsFile(allInnings, game);
+                     DeserializePlayersFile(allPitchers, allBatters, ref pitchers, ref batters);
+                     break;
+                  case DownloadFile.InfoToStoreEnum.Inning:
+                     DeserializeInningsFile(allInnings, game);
+                     break;
+                  case DownloadFile.InfoToStoreEnum.Players:
+                     DeserializePlayersFile(allPitchers, allBatters, ref pitchers, ref batters);
+                     break;
+               }
+
+               game.Pitchers = pitchers;
+               game.Batters = batters;
+               Logger.Log.InfoFormat("Finished deserializing gid: {0}",game.Gid);
             }
             else
             {
@@ -42,72 +65,16 @@ namespace PitchFxDataImporter
          }
       }
 
-      private void RemoveWrittenRecordsFromMemory()
-      {
-         try
-         {
-            var gamePks = new List<long>();
-            foreach (var game in MasterGamesInfo.Values)
-            {
-               foreach (var atBat in game.AtBats)
-               {
-                  atBat.Pitches.RemoveAll(p => p.IsPitchSaved);
-                  atBat.Runners.RemoveAll(p => p.IsRunnerSaved);
-
-                  var x = string.Empty;
-               }
-
-               var isRemovedAll = true;
-
-               foreach (var pitch in game.Pitches)
-               {
-                  Logger.Log.ErrorFormat("Unable to save pitch: {0}", pitch);
-                  isRemovedAll = false;
-               }
-
-               foreach (var runner in game.Runners)
-               {
-                  Logger.Log.ErrorFormat("Unable to save runner: {0}", runner);
-                  isRemovedAll = false;
-               }
-
-               if (isRemovedAll)
-               {
-                  game.AtBats.RemoveAll(ab => ab.IsAtBatSaved);
-                  foreach (var atBat in game.AtBats)
-                  {
-                     Logger.Log.ErrorFormat("Unablet to save at bat: {0}", atBat);
-                     isRemovedAll = false;
-                  }
-               }
-               if (isRemovedAll)
-                  gamePks.Add(game.GamePrimaryKey);
-            }
-
-            foreach (var gamePk in gamePks)
-            {
-               Game game;
-               MasterGamesInfo.TryRemove(gamePk, out game);
-            }
-
-            foreach (var game in MasterGamesInfo.Values)
-            {
-               Logger.Log.ErrorFormat("Could not write records corresponding with Game: {0}", game.Gid);
-            }
-            MasterGamesInfo.Clear();
-            var s = string.Empty;
-
-         }
-         catch (Exception ex)
-         {
-            Logger.LogException(ex);
-         }
-      }
-
       private void DeserializeInningsFile(FileInfo allInningsFileInfo, Game game)
       {
          try
          {
+            if (allInningsFileInfo == null)
+            {
+               Logger.Log.WarnFormat("Game: {0} has no innings file. (rain delayed or cancelled?)", game.Gid);
+               return;
+            }
+
             var doc = new XmlDocument();
             doc.Load(allInningsFileInfo.FullName);
 
@@ -117,10 +84,8 @@ namespace PitchFxDataImporter
                {
                   List<Action> actions = null;
                   var allGameAbs = LoopThroughInnings(node, game, ref actions);
-                  //List<Runner> runners = null;
-                  var allGamePitches = GetAllPitches(allGameAbs);
+                  GetAllPitches(allGameAbs);
                   game.AtBats = allGameAbs;
-                  //game.Pitches = allGamePitches;
                   game.Actions = actions;
                }
                else if (node.Name != "#comment")
@@ -135,6 +100,68 @@ namespace PitchFxDataImporter
          }
       }
 
+      private void DeserializePlayersFile(FileInfo[] allPitchers, FileInfo[] allBatters, ref List<Player> pitchers, ref List<Player> batters)
+      {
+         try
+         {
+            foreach (var pitcherFi in allPitchers)
+            {
+               var doc = new XmlDocument();
+               doc.Load(pitcherFi.FullName);
+               var playerNodeStr = doc.ChildNodes[1].OuterXml;
+               var serializer = new XmlSerializer(typeof(Player));
+               Player player;
+               using (var sr = new StringReader(playerNodeStr))
+               {
+                  player = (Player)serializer.Deserialize(sr);
+               }
+               if (player == null)
+               {
+                  Logger.Log.ErrorFormat("Unable to deserialize pitcher: {0} into Player object.", pitcherFi.FullName);
+               }
+               else
+               {
+                  player.SetFullName();
+                  pitchers.Add(player);
+               }
+            }
+
+            foreach (var batterFi in allBatters)
+            {
+               var doc = new XmlDocument();
+               doc.Load(batterFi.FullName);
+
+               var playerNodeStr = doc.ChildNodes[1].OuterXml;
+               var serializer = new XmlSerializer(typeof(Player));
+               Player player;
+               using (var sr = new StringReader(playerNodeStr))
+               {
+                  player = (Player)serializer.Deserialize(sr);
+               }
+               if (player == null)
+               {
+                  Logger.Log.ErrorFormat("Unable to deserialize batter: {0} into Player object.", batterFi.FullName);
+               }
+               else
+               {
+                  player.SetFullName();
+                  batters.Add(player);
+               }
+            }
+
+         }
+         catch (Exception ex)
+         {
+            Logger.LogException(ex);
+         }
+      }
+
+      /// <summary>
+      /// Not in love with the return type... since I don't assign the pitches 
+      /// The individual abs get assigned the pitches...
+      /// </summary>
+      /// <param name="allGameAbs"></param>
+      /// <returns></returns>
       private List<Pitch> GetAllPitches(IEnumerable<AtBat> allGameAbs)
       {
          try
@@ -422,6 +449,69 @@ namespace PitchFxDataImporter
             }
             game.Home = home;
             game.Away = away;
+         }
+         catch (Exception ex)
+         {
+            Logger.LogException(ex);
+         }
+      }
+
+
+      private void RemoveWrittenRecordsFromMemory()
+      {
+         try
+         {
+            var gamePks = new List<long>();
+            foreach (var game in MasterGamesInfo.Values)
+            {
+               foreach (var atBat in game.AtBats)
+               {
+                  atBat.Pitches.RemoveAll(p => p.IsPitchSaved);
+                  atBat.Runners.RemoveAll(p => p.IsRunnerSaved);
+
+                  var x = string.Empty;
+               }
+
+               var isRemovedAll = true;
+
+               foreach (var pitch in game.Pitches)
+               {
+                  Logger.Log.ErrorFormat("Unable to save pitch: {0}", pitch);
+                  isRemovedAll = false;
+               }
+
+               foreach (var runner in game.Runners)
+               {
+                  Logger.Log.ErrorFormat("Unable to save runner: {0}", runner);
+                  isRemovedAll = false;
+               }
+
+               if (isRemovedAll)
+               {
+                  game.AtBats.RemoveAll(ab => ab.IsAtBatSaved);
+                  foreach (var atBat in game.AtBats)
+                  {
+                     Logger.Log.ErrorFormat("Unablet to save at bat: {0}", atBat);
+                     isRemovedAll = false;
+                  }
+               }
+               if (isRemovedAll)
+                  gamePks.Add(game.GamePrimaryKey);
+            }
+
+            foreach (var gamePk in gamePks)
+            {
+               Game game;
+               MasterGamesInfo.TryRemove(gamePk, out game);
+            }
+
+            foreach (var game in MasterGamesInfo.Values)
+            {
+               Logger.Log.ErrorFormat("Could not write records corresponding with Game: {0}", game.Gid);
+            }
+            MasterGamesInfo.Clear();
+            var s = string.Empty;
+
          }
          catch (Exception ex)
          {

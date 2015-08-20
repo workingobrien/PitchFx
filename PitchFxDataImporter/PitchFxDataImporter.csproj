@@ -52,6 +52,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Importer.cs" />
     <Compile Include="Importer.Deserialize.cs" />
+    <Compile Include="Importer.OneTime.cs" />
     <Compile Include="Importer.SaveToDisk.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

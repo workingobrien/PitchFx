@@ -25,6 +25,8 @@ namespace PitchFx.Contract
       private const string AwayAbbrevCol = "away_abbrev";
       private const string HomeIdCol = "home_id";
       private const string AwayIdCol = "away_id";
+      private const string TotalPitchesCol = "total_pitches";
+      private const string TotalAtBatsCol = "total_atbats";
 
       public Game()
       {
@@ -72,6 +74,21 @@ namespace PitchFx.Contract
 
             AtBats = new List<AtBat>();
             Actions = new List<Action>();
+
+            var totalPitches = row[TotalPitchesCol].ToString();
+            var totalAtBats = row[TotalAtBatsCol].ToString();
+
+            if (!string.IsNullOrEmpty(totalPitches))
+            {
+               TotalPitches = Convert.ToInt32(totalPitches);
+            }
+
+            if (!string.IsNullOrEmpty(totalAtBats))
+            {
+               TotalAtBats = Convert.ToInt32(totalAtBats);
+            }
+
+
 
             IsDeserializedFromDb = true;
          }
@@ -143,10 +160,45 @@ namespace PitchFx.Contract
       {
          get { return AtBats.SelectMany(ab => ab.Runners).ToList(); }
       } 
-      public List<Action> Actions { get; set; } 
+      public List<Action> Actions { get; set; }
+ 
+      //TODO: after all at bats has been set, I should load up the distinct list of pitchers and batters in this object here..
+      public List<Player> Batters { get; set; } 
+      public List<Player> Pitchers { get; set; }
+
+
+      private int? _totalAtBats;
+      public int? TotalAtBats
+      {
+         get
+         {
+            if (_totalAtBats.HasValue)
+               return _totalAtBats;
+
+            _totalAtBats = AtBats.Count;
+            return _totalAtBats;
+         }
+         set { _totalAtBats = value; }
+      }
+
+      private int? _totalPitches;
+      public int? TotalPitches
+      {
+         get
+         {
+            if (_totalPitches.HasValue)
+               return _totalPitches;
+
+            _totalPitches = Pitches.Count;
+            return _totalPitches;
+         }
+         set { _totalPitches = value; }
+      }
       
       public bool IsGameSaved { get; set; }
       public bool IsDeserializedFromDb { get; set; }
+      public bool IsObjectFullyFormed { get; set; }
+
 
       public override string ToString()
       {

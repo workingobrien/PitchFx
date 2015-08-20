@@ -14,6 +14,7 @@ namespace PitchFx.Contract
    [XmlRoot("atbat")]
    public sealed class AtBat
    {
+      #region Col Names
       private const string GamePrimaryKeyCol = "game_primaryKey";
       private const string GidCol = "gid";
       private const string AtBatGuidCol = "ab_guid";
@@ -33,6 +34,7 @@ namespace PitchFx.Contract
       private const string EventCol = "event";
       private const string HomeTeamRunsCol = "home_team_runs";
       private const string AwayTeamRunsCol = "away_team_runs";
+      #endregion
 
       public AtBat()
       {

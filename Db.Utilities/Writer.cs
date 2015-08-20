@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using COB.LogWrapper;
 using MySql.Data.MySqlClient;
@@ -14,14 +15,25 @@ namespace Db.Utilities
 {
    public static class Writer
    {
+      private static List<long> _playerIdsWritten = new List<long>();
 
-      public static void UpdateTableWithGameInfo(ConcurrentDictionary<long, Game> allGames)
+      public static void UpdateTableWithGameInfo(ConcurrentDictionary<long, Game> allGames, DownloadFile.InfoToStoreEnum infoToStore)
       {
          Logger.Log.InfoFormat("Attempting to save the following to the database:");
          Logger.Log.InfoFormat("Games: {0}", allGames.Count);
          Logger.Log.InfoFormat("At Bats: {0}", allGames.Values.SelectMany(g => g.AtBats).ToList().Count);
          Logger.Log.InfoFormat("Pitches: {0}", allGames.Values.SelectMany(g => g.Pitches).ToList().Count);
          Logger.Log.InfoFormat("Runners: {0}", allGames.Values.SelectMany(g => g.Runners).ToList().Count);
+         Logger.Log.InfoFormat("Batters: {0}", allGames.Values.SelectMany(g => g.Batters).ToList().Count);
+         Logger.Log.InfoFormat("Pitchers: {0}", allGames.Values.SelectMany(g => g.Pitchers).ToList().Count);
+
+         while (Getter.IsCachLoading)
+         {
+            Logger.Log.Warn("Cache is still loading... wait 10 seconds.");
+            Thread.Sleep(10000);
+         }
+
+         var allGids = Getter.LoadedGids;
 
          foreach (var game in allGames.Values)
          {
@@ -30,28 +42,124 @@ namespace Db.Utilities
                var totalAtBats = game.AtBats.Count;
                var totalPitches = game.Pitches.Count;
                var totalRunners = game.Runners.Count;
+               var totalBatters = game.Batters.Count;
+               var totalPitchers = game.Pitchers.Count;
 
-               WriteGame(game);
-               var totalAtBatsWritten = WriteAtBats(game.AtBats);
-               var totalPitchesWritten = WritePitches(game.Pitches);
-               var totalRunnersWritten = WriteRunners(game.Runners);
+               int totalAtBatsWritten = 0;
+               int totalPitchesWritten = 0;
+               int totalRunnersWritten = 0;
+               int totalBattersWritten = 0;
+               int totalPitchersWritten = 0;
 
-               var str = string.Format("{0}: Wrote {1}/{2} Atbats, {3}/{4} Pitches, {5}/{6} Runners",
-                  game.Gid, totalAtBatsWritten, totalAtBats, totalPitchesWritten, totalPitches, totalRunnersWritten, totalRunners);
+               var gid = game.GamePrimaryKey;
+               if (!allGids.Contains(gid) && infoToStore != DownloadFile.InfoToStoreEnum.Players)
+               {
+                  WriteGame(game);
+               }
+
+               long atBatsLoaded;
+               long pitchesLoaded;
+               long runnersLoaded;
+               long battersLoaded;
+               long pitchersLoaded;
+
+               Getter.LoadedAtBatCntByGid.TryGetValue(gid, out atBatsLoaded);
+               Getter.LoadedPitchesCntByGid.TryGetValue(gid, out pitchesLoaded);
+               Getter.LoadedRunnerCntByGid.TryGetValue(gid, out runnersLoaded);
+               Getter.LoadedBattersCntByGid.TryGetValue(gid, out battersLoaded);
+               Getter.LoadedPitchersCntByGid.TryGetValue(gid, out pitchersLoaded);
+
+               //TODO: prevent dupilicates.. 
+
+               switch (infoToStore)
+               {
+                  case DownloadFile.InfoToStoreEnum.All:
+                     if (atBatsLoaded != game.AtBats.Count)
+                        totalAtBatsWritten = WriteAtBats(game.AtBats);
+                     else
+                        Logger.Log.WarnFormat("Not writing at bats for gid: {0}, already has {1} at bats loaded. Would have tried saving: {2} at bats", gid, atBatsLoaded, game.AtBats.Count);
+
+                     if (pitchesLoaded != game.Pitches.Count)
+                        totalPitchesWritten = WritePitches(game.Pitches);
+                     else
+                        Logger.Log.WarnFormat("Not writing pitches for gid: {0}, already has {1} pitches loaded. Would have tried saving: {2} pitches", gid, pitchesLoaded, game.Pitches.Count);
+
+                     if (runnersLoaded != game.Runners.Count)
+                        totalRunnersWritten = WriteRunners(game.Runners);
+                     else
+                        Logger.Log.WarnFormat("Not writing runners for gid: {0}, already has {1} runners loaded. Would have tried saving: {2} runners", gid, runnersLoaded, game.Runners.Count);
+
+                     if (battersLoaded != game.Batters.Count)
+                        totalBattersWritten = WriteBatters(game.Batters);
+                     else
+                        Logger.Log.WarnFormat("Not writing batters for gid: {0}, already has {1} batters loaded. Would have tried saving: {2} batters", gid, battersLoaded, game.Batters.Count);
+
+                     if (pitchersLoaded != game.Pitchers.Count)
+                        totalPitchersWritten = WritePitchers(game.Pitchers);
+                     else
+                        Logger.Log.WarnFormat("Not writing pitchers for gid: {0}, already has {1} pitchers loaded. Would have tried saving: {2} pitchers", gid, pitchersLoaded, game.Pitchers.Count);
+                     break;
+                  case DownloadFile.InfoToStoreEnum.Inning:
+                     if (atBatsLoaded != game.AtBats.Count)
+                        totalAtBatsWritten = WriteAtBats(game.AtBats);
+                     else
+                        Logger.Log.WarnFormat("Not writing at bats for gid: {0}, already has {1} at bats loaded. Would have tried saving: {2} at bats", gid, atBatsLoaded, game.AtBats.Count);
+
+                     if (pitchesLoaded != game.Pitches.Count)
+                        totalPitchesWritten = WritePitches(game.Pitches);
+                     else
+                        Logger.Log.WarnFormat("Not writing pitches for gid: {0}, already has {1} pitches loaded. Would have tried saving: {2} pitches", gid, pitchesLoaded, game.Pitches.Count);
+
+                     if (runnersLoaded != game.Runners.Count)
+                        totalRunnersWritten = WriteRunners(game.Runners);
+                     else
+                        Logger.Log.WarnFormat("Not writing runners for gid: {0}, already has {1} runners loaded. Would have tried saving: {2} runners", gid, runnersLoaded, game.Runners.Count);
+                     break;
+                  case DownloadFile.InfoToStoreEnum.Players:
+                     if (battersLoaded != game.Batters.Count)
+                        totalBattersWritten = WriteBatters(game.Batters);
+                     else
+                        Logger.Log.WarnFormat("Not writing batters for gid: {0}, already has {1} batters loaded. Would have tried saving: {2} batters", gid, battersLoaded, game.Batters.Count);
+
+                     if (pitchersLoaded != game.Pitchers.Count)
+                        totalPitchersWritten = WritePitchers(game.Pitchers);
+                     else
+                        Logger.Log.WarnFormat("Not writing pitchers for gid: {0}, already has {1} pitchers loaded. Would have tried saving: {2} pitchers", gid, pitchersLoaded, game.Pitchers.Count);
+                     break;
+               }
+
+               var str = string.Format("{0}: Wrote {1}/{2} Atbats, {3}/{4} Pitches, {5}/{6} Runners, {7}/{8} Batters, {9}/{10} Pitchers",
+                  game.Gid, totalAtBatsWritten, totalAtBats, totalPitchesWritten, totalPitches, totalRunnersWritten, totalRunners, totalBattersWritten, totalBatters, totalPitchersWritten, totalPitchersWritten);
                Logger.Log.Info(str);
+
+               var errorStr = new StringBuilder();
 
                if (totalAtBats != totalAtBatsWritten)
                {
-                  throw new Exception("Not all at bats written for Gid: " + game.Gid);
+                  errorStr.AppendLine("Not all at bats written for Gid: " + game.Gid);
                }
                if (totalPitches != totalPitchesWritten)
                {
-                  throw new Exception("Not all pitches written for Gid: " + game.Gid);
+                  errorStr.AppendLine("Not all pitches written for Gid: " + game.Gid);
                }
                if (totalRunners != totalRunnersWritten)
                {
-                  throw new Exception("Not all runners written for Gid: " + game.Gid);
+                  errorStr.AppendLine("Not all runners written for Gid: " + game.Gid);
                }
+
+               if (totalBatters != totalBattersWritten)
+               {
+                  errorStr.AppendLine("Not all batters written for Gid: " + game.Gid);
+               }
+
+               if (totalPitchers != totalPitchersWritten)
+               {
+                  errorStr.AppendLine("Not all pitchers written for Gid: " + game.Gid);
+               }
+
+               if (errorStr.Length != 0)
+                  Logger.Log.Warn(errorStr.ToString());
+
             }
             catch (Exception ex)
             {
@@ -89,6 +197,40 @@ namespace Db.Utilities
                throw new Exception("Could not write game: " + game.ToString());
             else
                game.IsGameSaved = true;
+         }
+         catch (Exception ex)
+         {
+            Logger.LogException(ex);
+         }
+      }
+
+      public static void UpdateGamePitchesAndAtBats(Game game)
+      {
+         try
+         {
+            if (game.TotalAtBats.HasValue && game.TotalPitches.HasValue)
+            {
+               var connection = DbConnector.Instance.SqlConnection;
+               var cmd = connection.CreateCommand();
+               const string sql = @"update games 
+                                 set total_atbats = @total_atbats, total_pitches = @total_pitches
+                                 where game_primarykey = @game_primarykey";
+               cmd.CommandText = sql;
+               cmd.Parameters.AddWithValue("@total_atbats", game.TotalAtBats.Value);
+               cmd.Parameters.AddWithValue("@total_pitches", game.TotalPitches.Value);
+               cmd.Parameters.AddWithValue("@game_primarykey", game.GamePrimaryKey);
+
+               var results = cmd.ExecuteNonQuery();
+               if (results != 1)
+                  throw new Exception("Could not update game: " + game.ToString());
+
+               Logger.Log.InfoFormat("Updated gid: {0} with total atbats: {1} and total pitches:{2}", game.Gid, game.TotalAtBats, game.TotalPitches);
+            }
+            else
+            {
+               Logger.Log.WarnFormat("Not updating gid: {0}, missing total atbats or total pitches", game.Gid);
+            }
+
          }
          catch (Exception ex)
          {
@@ -168,11 +310,11 @@ namespace Db.Utilities
             const string sql = @"
                      insert into pitches
                         (pitch_guid, ab_guid, gid, game_primarykey, des, id, type, tfs, tfs_zulu, x, y, event_num, sv_id, start_speed, end_speed, sz_top, sz_bot,
-                         pfx_x, pfx_y, vx0 ,vy0, vz0, px, pz, x0, y0, z0, ax, ay, az, break_y, break_length, break_angle, pitch_type, type_confidence, zone, nasty, 
+                         pfx_x, pfx_z, vx0 ,vy0, vz0, px, pz, x0, y0, z0, ax, ay, az, break_y, break_length, break_angle, pitch_type, type_confidence, zone, nasty, 
                          spin_dir, spin_rate, pitcher)
                      values
                         (@pitch_guid, @ab_guid, @gid, @game_primarykey, @des, @id, @type, @tfs, @tfs_zulu, @x, @y, @event_num, @sv_id, @start_speed, @end_speed, @sz_top, @sz_bot,
-                         @pfx_x, @pfx_y, @vx0 ,@vy0, @vz0, @px, @pz, @x0, @y0, @z0, @ax, @ay, @az, @break_y, @break_length, @break_angle, @pitch_type, @type_confidence, @zone, @nasty, 
+                         @pfx_x, @pfx_z, @vx0 ,@vy0, @vz0, @px, @pz, @x0, @y0, @z0, @ax, @ay, @az, @break_y, @break_length, @break_angle, @pitch_type, @type_confidence, @zone, @nasty, 
                          @spin_dir, @spin_rate, @pitcher)";
 
             cmd.CommandText = sql;
@@ -194,7 +336,7 @@ namespace Db.Utilities
             cmd.Parameters.AddWithValue("@sz_top", pitch.SzTop);
             cmd.Parameters.AddWithValue("@sz_bot", pitch.SzBot);
             cmd.Parameters.AddWithValue("@pfx_x", pitch.PfxX);
-            cmd.Parameters.AddWithValue("@pfx_y", pitch.PfxY);
+            cmd.Parameters.AddWithValue("@pfx_z", pitch.PfxZ);
             cmd.Parameters.AddWithValue("@vx0", pitch.Vx0);
             cmd.Parameters.AddWithValue("@vy0", pitch.Vy0);
             cmd.Parameters.AddWithValue("@vz0", pitch.Vz0);
@@ -268,6 +410,61 @@ namespace Db.Utilities
                throw new Exception("Could not write runner: " + runner);
             else
                runner.IsRunnerSaved = true;
+         }
+         catch (Exception ex)
+         {
+            Logger.LogException(ex);
+            return 0;
+         }
+         return 1;
+      }
+
+      private static int WritePitchers(IEnumerable<Player> pitchers)
+      {
+         var connection = DbConnector.Instance.SqlConnection;
+         return pitchers.Sum(pitcher => WritePlayer(connection, pitcher));
+      }
+
+      private static int WriteBatters(IEnumerable<Player> batters)
+      {
+         var connection = DbConnector.Instance.SqlConnection;
+         return batters.Sum(batter => WritePlayer(connection, batter));
+      }
+
+      private static int WritePlayer(MySqlConnection connection, Player player)
+      {
+         if (_playerIdsWritten.Contains(player.Id) || Getter.AllPlayers.Contains(player.Id))
+         {
+            //Logger.Log.WarnFormat("Player Id: {0} already written...",player.Id);
+            return 1;
+         }
+
+         try
+         {
+            var cmd = connection.CreateCommand();
+            const string sql = @"insert into players
+                                 (id, type, first_name, last_name, full_name, pos, bats, throws)
+                                 values
+                                 (@id, @type, @first_name, @last_name, @full_name, @pos, @bats, @throws)";
+            cmd.CommandText = sql;
+            cmd.Parameters.AddWithValue("@id", player.Id);
+            cmd.Parameters.AddWithValue("@type", player.Type);
+            cmd.Parameters.AddWithValue("@first_name", player.FirstName);
+            cmd.Parameters.AddWithValue("@last_name", player.LastName);
+            cmd.Parameters.AddWithValue("@full_name", player.FullName);
+            cmd.Parameters.AddWithValue("@pos", player.Pos);
+            cmd.Parameters.AddWithValue("@bats", player.Bats);
+            cmd.Parameters.AddWithValue("@throws", player.Throws);
+
+            var results = cmd.ExecuteNonQuery();
+            if (results != 1)
+               throw new Exception("Could not write player: " + player);
+            else
+            {
+               player.IsPlayersSaved = true;
+               _playerIdsWritten.Add(player.Id);
+            }
+
          }
          catch (Exception ex)
          {

@@ -1,0 +1,17 @@
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\PitchFx.Implement.Service.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\PitchFx.Implement.Service.pdb
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\COB.LogWrapper.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\PitchFx.Contract.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\log4net.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\COB.LogWrapper.pdb
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\PitchFx.Contract.pdb
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\log4net.xml
+C:\dev\PitchFx\PitchFx.Implement.Service\obj\Debug\PitchFx.Implement.Service.csprojResolveAssemblyReference.cache
+C:\dev\PitchFx\PitchFx.Implement.Service\obj\Debug\PitchFx.Implement.Service.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\obj\Debug\PitchFx.Implement.Service.pdb
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\PitchFxDataImporter.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\WebDriver.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\Db.Utilities.dll
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\PitchFxDataImporter.pdb
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\WebDriver.xml
+C:\dev\PitchFx\PitchFx.Implement.Service\bin\Debug\Db.Utilities.pdb
