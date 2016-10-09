@@ -15,8 +15,8 @@ namespace PitchFxDataImporter
       {
          try
          {
-            var since = new DateTime(2014, 1, 1);
-            var until = new DateTime(2015, 1, 1);
+            var since = new DateTime(2013, 1, 1);
+            var until = new DateTime(2014, 1, 1);
 
             //var since = new DateTime(2010, 1, 1);
             //var until = new DateTime(2010, 6, 1);

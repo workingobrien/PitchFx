@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PitchFx.Load.ConsoleApp", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PitchFx.Implement.Service", "PitchFx.Implement.Service\PitchFx.Implement.Service.csproj", "{FF5D1A03-993A-4873-A81B-BBA781F81A93}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PitchFx.Load.ServiceHost", "PitchFx.Load.ServiceHost\PitchFx.Load.ServiceHost.csproj", "{89B06A92-0F15-4E82-8280-A2732B2C48F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF5D1A03-993A-4873-A81B-BBA781F81A93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89B06A92-0F15-4E82-8280-A2732B2C48F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89B06A92-0F15-4E82-8280-A2732B2C48F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89B06A92-0F15-4E82-8280-A2732B2C48F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89B06A92-0F15-4E82-8280-A2732B2C48F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,7 +17,7 @@ namespace PitchFx.Implement.Service
     {
       public void LoadYesterdaysPitchFxData()
       {
-         var yesterday = DateTime.Today.AddDays(-2);
+         var yesterday = DateTime.Today;
          Logger.Log.InfoFormat("");
          Logger.Log.InfoFormat("## \\/ ##");
          Logger.Log.InfoFormat("Load Yesterdays PitchFx data for date: {0}",yesterday);
@@ -28,7 +28,7 @@ namespace PitchFx.Implement.Service
       {
          Logger.Log.InfoFormat("");
          Logger.Log.InfoFormat("## \\/ ##");
-         Logger.Log.InfoFormat("Load PitchFx data for date: {0}", date);
+         Logger.Log.InfoFormat("Load PitchFx data for date: {0}", date.Date);
          LoadPitchFxData(date, date);
       }
 
@@ -36,7 +36,7 @@ namespace PitchFx.Implement.Service
       {
          Logger.Log.InfoFormat("");
          Logger.Log.InfoFormat("## \\/ ##");
-         Logger.Log.InfoFormat("Load Pitch Fx data for range - since: {0}, until: {1}",since,until);
+         Logger.Log.InfoFormat("Load Pitch Fx data for range - since: {0}, until: {1}",since.Date,until.Date);
          LoadPitchFxData(since,until);
       }
 

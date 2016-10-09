@@ -31,10 +31,10 @@ namespace TestConnector
          try
          {
             Logger.Log.InfoFormat("Starting up PitchFx test connection...");
-            Importer.Instance.Init(DownloadFile.InfoToStoreEnum.Inning);
-            Importer.Instance.BulkLoadFromTestConnector();
+            //Importer.Instance.Init(DownloadFile.InfoToStoreEnum.Inning);
+            //Importer.Instance.BulkLoadFromTestConnector();
 
-            //Importer.Instance.SaveNumberOfAtBatsAndPitchesOnGame();
+            Importer.Instance.SaveNumberOfAtBatsAndPitchesOnGame();
 
             Logger.Log.InfoFormat("Finished!.....");
 

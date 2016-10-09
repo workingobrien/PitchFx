@@ -55,25 +55,24 @@ namespace Db.Utilities
             _loadedGids = games.Keys.ToList();
             Logger.Log.InfoFormat("### {0} Games exits in the database.", _loadedGids.Count);
 
-            long minGamePrimaryKey = 0;
-            long maxGamePrimaryKey = 0;
-
-            //var atBats = GetAtBatsByDate(since, until);
-            //Logger.Log.InfoFormat("### {0} At bats exist in the database.",atBats.Count);
-
-            //games = LinkDeserializeAtBats(games, atBats, ref minGamePrimaryKey, ref maxGamePrimaryKey);
-
-            //var pitches = GetPitchesByPrimaryKey(minGamePrimaryKey, maxGamePrimaryKey);
-            //Logger.Log.InfoFormat("### {0} Pitches exist in the database.", pitches.Count);
-
-            //LinkDeserializedPitches(games, pitches);
+            var totalAtBats = 0;
+            var totalPitches = 0;
 
             foreach (var game in games)
             {
-               _loadedAtBatsCntByGid[game.Key] = game.Value.AtBats.Count;
-               _loadedPitchesCntByGid[game.Key] = game.Value.Pitches.Count;
-               _loadedRunnerCntByGid[game.Key] = game.Value.Runners.Count;
+               var atBatCnt = game.Value.TotalAtBats.GetValueOrDefault();
+               totalAtBats += atBatCnt;
+               _loadedAtBatsCntByGid[game.Key] = atBatCnt;
+               
+               var pitchCnt = game.Value.TotalPitches.GetValueOrDefault();
+               totalPitches += pitchCnt;
+               _loadedPitchesCntByGid[game.Key] = pitchCnt;
+               
+               //_loadedRunnerCntByGid[game.Key] = game.Value.Runners.Count;
             }
+
+            Logger.Log.InfoFormat("### {0} At bats exist in the database.", totalAtBats);
+            Logger.Log.InfoFormat("### {0} Pitches exist in the database.", totalPitches);
 
             foreach (var player in allPlayers)
             {
@@ -107,11 +106,11 @@ namespace Db.Utilities
          get { return _loadedPitchesCntByGid; }
       }
 
-      private static ConcurrentDictionary<long, long> _loadedRunnerCntByGid = new ConcurrentDictionary<long, long>();
-      public static ConcurrentDictionary<long, long> LoadedRunnerCntByGid
-      {
-         get { return _loadedRunnerCntByGid; }
-      }
+      //private static ConcurrentDictionary<long, long> _loadedRunnerCntByGid = new ConcurrentDictionary<long, long>();
+      //public static ConcurrentDictionary<long, long> LoadedRunnerCntByGid
+      //{
+      //get { return _loadedRunnerCntByGid; }
+      //}
 
       private static ConcurrentDictionary<long, long> _loadedBattersCntByGid = new ConcurrentDictionary<long, long>();
       public static ConcurrentDictionary<long, long> LoadedBattersCntByGid
@@ -130,11 +129,6 @@ namespace Db.Utilities
       {
          get { return _allPlayers; }
       }
-
-      //private static List<long> GetLoadedGameIds()
-      //{
-      //return GetGamesByDate(DateTime.Today.AddDays(-100000), DateTime.Today.AddDays(3)).Keys.ToList();
-      //}
 
       public static ConcurrentDictionary<long, Game> GetGamesByDate(DateTime since, DateTime until)
       {
@@ -288,7 +282,7 @@ namespace Db.Utilities
             var minMaxKeys = new List<Tuple<long, long>>();
 
             long chunks = (((maxPrimaryKey - minPrimaryKey) + 1) / 150) + 1;
-            Logger.Log.InfoFormat("Breaking up: {0} games in: {1} chunks.",maxPrimaryKey-minPrimaryKey+1,chunks);
+            Logger.Log.InfoFormat("Breaking up: {0} games in: {1} chunks.", maxPrimaryKey - minPrimaryKey + 1, chunks);
 
             long startingKey = minPrimaryKey;
 
@@ -319,7 +313,7 @@ namespace Db.Utilities
                   var dataAdapter = new MySqlDataAdapter(cmd);
                   dataAdapter.Fill(table);
                   ds.Tables.Add(table);
-                  Logger.Log.InfoFormat("Finished chunk cnt: {0} with {1} pitches.",chunkCnt,table.Rows.Count);
+                  Logger.Log.InfoFormat("Finished chunk cnt: {0} with {1} pitches.", chunkCnt, table.Rows.Count);
                   chunkCnt++;
                }
             }

@@ -78,12 +78,12 @@ namespace PitchFx.Contract
             var totalPitches = row[TotalPitchesCol].ToString();
             var totalAtBats = row[TotalAtBatsCol].ToString();
 
-            if (!string.IsNullOrEmpty(totalPitches))
+            if (!string.IsNullOrEmpty(totalPitches) && totalPitches != "0")
             {
                TotalPitches = Convert.ToInt32(totalPitches);
             }
 
-            if (!string.IsNullOrEmpty(totalAtBats))
+            if (!string.IsNullOrEmpty(totalAtBats) && totalAtBats != "0")
             {
                TotalAtBats = Convert.ToInt32(totalAtBats);
             }

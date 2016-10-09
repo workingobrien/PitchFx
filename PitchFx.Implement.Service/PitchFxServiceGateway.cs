@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
 using System.ServiceProcess;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using COB.LogWrapper;
 
 namespace PitchFx.Implement.Service
@@ -19,8 +15,6 @@ namespace PitchFx.Implement.Service
             var host = new ServiceHost(typeof (PitchFxService));
             host.Opened += HostOnOpened;
             host.Open();
-           
-
          }
          catch (Exception ex)
          {

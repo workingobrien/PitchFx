@@ -65,11 +65,9 @@ namespace Db.Utilities
 
                Getter.LoadedAtBatCntByGid.TryGetValue(gid, out atBatsLoaded);
                Getter.LoadedPitchesCntByGid.TryGetValue(gid, out pitchesLoaded);
-               Getter.LoadedRunnerCntByGid.TryGetValue(gid, out runnersLoaded);
+               //Getter.LoadedRunnerCntByGid.TryGetValue(gid, out runnersLoaded);
                Getter.LoadedBattersCntByGid.TryGetValue(gid, out battersLoaded);
                Getter.LoadedPitchersCntByGid.TryGetValue(gid, out pitchersLoaded);
-
-               //TODO: prevent dupilicates.. 
 
                switch (infoToStore)
                {
@@ -84,7 +82,8 @@ namespace Db.Utilities
                      else
                         Logger.Log.WarnFormat("Not writing pitches for gid: {0}, already has {1} pitches loaded. Would have tried saving: {2} pitches", gid, pitchesLoaded, game.Pitches.Count);
 
-                     if (runnersLoaded != game.Runners.Count)
+                     //if (runnersLoaded != game.Runners.Count)
+                     if (true)
                         totalRunnersWritten = WriteRunners(game.Runners);
                      else
                         Logger.Log.WarnFormat("Not writing runners for gid: {0}, already has {1} runners loaded. Would have tried saving: {2} runners", gid, runnersLoaded, game.Runners.Count);
@@ -110,7 +109,8 @@ namespace Db.Utilities
                      else
                         Logger.Log.WarnFormat("Not writing pitches for gid: {0}, already has {1} pitches loaded. Would have tried saving: {2} pitches", gid, pitchesLoaded, game.Pitches.Count);
 
-                     if (runnersLoaded != game.Runners.Count)
+                     //if (runnersLoaded != game.Runners.Count)
+                     if (true)
                         totalRunnersWritten = WriteRunners(game.Runners);
                      else
                         Logger.Log.WarnFormat("Not writing runners for gid: {0}, already has {1} runners loaded. Would have tried saving: {2} runners", gid, runnersLoaded, game.Runners.Count);
